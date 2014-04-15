@@ -7,7 +7,7 @@
 from numpy import *
 
 ALL_DATA = 458293
-DATA_SIZE = 100000
+DATA_SIZE = ALL_DATA
 
 
 
@@ -24,13 +24,16 @@ D = zeros((0, 4))
 avg_u = dict()
 avg_m = dict()
 
+quiz = []
+
 # iterate through the data
 for i in range(DATA_SIZE):
 	# tokenize the current line and add the row to the data matrix
 	s = u.next().strip()
 	index = idx.next().strip()
 	if int(index) >= 4:
-		continue
+		if int(index) == 5:
+			quiz.append(s.split()[1])
 
 	l = s.split()
 	D = vstack([D, l])
@@ -51,10 +54,13 @@ for i in range(DATA_SIZE):
 
 
 # closing data file. 
-u.close
+u.close()
 
-	
-
+f = open('blank1.dta', 'w')
+for a in quiz:
+	s = '{0}'.format(round(mean(avg_m[a]), 3)) + '\n'
+	f.write(s)
+f.close()
 # the rest of the code is just for making sure everything above works
 
 # print some sample data 
