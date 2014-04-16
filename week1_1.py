@@ -7,7 +7,7 @@
 from numpy import *
 
 ALL_DATA = 458293
-DATA_SIZE = ALL_DATA
+DATA_SIZE = 400000
 
 
 
