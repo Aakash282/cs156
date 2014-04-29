@@ -8,7 +8,7 @@ int main(){
 	FILE *fp3;
 	fp = fopen("../../netflix/mu/all.dta", "r");
 	fp2 = fopen( "../../netflix/mu/all.idx", "r");
-	fp3 = fopen("../../res/res_f1.dta", "r");
+	fp3 = fopen("../../res/res_f3.dta", "r");
 	if (fp == NULL || fp2 == NULL || fp3 == NULL) {
 		return -1;
 	}
@@ -89,7 +89,7 @@ int main(){
 	char user_feature_file[50];
 	
 	// Train each feature
-	for (int f = 2; f < 4; f++) {
+	for (int f = 4; f < 101; f++) {
 		
 		printf("\n-------Feature %d -----------------\n", f);
 		// Initialize feature to 0.1
@@ -142,7 +142,7 @@ int main(){
 	// Save res for last feature
 	printf("\n----------Saving Residuals----------\n");
 	// Save residuals
-	FILE *fp4 = fopen("../../res/res_f3.dta", "w");
+	FILE *fp4 = fopen("../../res/res_f100.dta", "w");
 	for (int j = 0; j < num_lines; j++) {
 		fprintf(fp4, "%f\n", res_data[j]);
 
