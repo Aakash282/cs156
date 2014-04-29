@@ -16,8 +16,8 @@ int main(){
 	char str2[5];
 	char str3[15];
 
-	// int num_lines = 99666408;
-	int num_lines = 10000;
+	int num_lines = 99666408;
+	//int num_lines = 10000;
 	
 	printf("\n----------Loading res data-------------\n");
 	// Load res data
@@ -28,9 +28,9 @@ int main(){
 	}
 	int count = 0;
 	while (fgets(str, 60, fp3) != NULL) {
-		res_data[count] = atof(strtok(str, " "));
+		res_data[count] = atof((char *)strtok(str, " "));
 		count++;
-		if (count % 1000000 == 0) {
+		if (count % 10000000 == 0) {
 			printf("%d\n", count);
 		}
 	}
@@ -50,19 +50,19 @@ int main(){
 	printf("\n----------Loading movie data-------------\n");
 	while (fgets(str, 60, fp) != NULL && fgets(str2, 5, fp2) != NULL) {
 		// Only use index < 5
-		if (atoi(strtok(str2, " ")) == 5) {
+		if (atoi((char *)strtok(str2, " ")) == 5) {
 			continue;
 		}
 
 		// Get user, movie, rating
-		movie_data[line_number] = (int) atoi(strtok(str, " "));
-		movie_data[line_number + 1] = (int) atoi(strtok(NULL, " "));
+		movie_data[line_number] = atoi((char *)strtok(str, " "));
+		movie_data[line_number + 1] = atoi((char *)strtok(NULL, " "));
 		strtok(NULL, " ");
-		movie_data[line_number + 2] = (int) atoi(strtok(NULL, " "));
+		movie_data[line_number + 2] = atoi((char *)strtok(NULL, " "));
 
 		line_number += 3;
 		sample++;
-		if (sample % 1000000 == 0) {
+		if (sample % 10000000 == 0) {
 			printf("%d\n", sample);
 		}
 	}
@@ -89,7 +89,7 @@ int main(){
 	char user_feature_file[50];
 	
 	// Train each feature
-	for (int f = 0; f < 1; f++) {
+	for (int f = 2; f < 4; f++) {
 		
 		printf("\n-------Feature %d -----------------\n", f);
 		// Initialize feature to 0.1
@@ -125,13 +125,13 @@ int main(){
 		// Save feature
 		printf("\n-----------Saving features-----------\n");
 		// Save features
-		sprintf(movie_feature_file, "/features/feature_m%d.dta", f);
+		sprintf(movie_feature_file, "features/feature_m%d.dta", f);
 		fp5 = fopen(movie_feature_file, "w");
 		for (int f = 1; f < num_movies; f++) {
 			fprintf(fp5, "%f\n", movieValue[f]);
 		}
 		fclose(fp5);
-		sprintf(user_feature_file, "/features/feature_u%d.dta", f);
+		sprintf(user_feature_file, "features/feature_u%d.dta", f);
 		fp6 = fopen(user_feature_file, "w");
 		for (int f = 1; f < num_users; f++) {
 			fprintf(fp6, "%f\n", userValue[f]);
@@ -142,7 +142,7 @@ int main(){
 	// Save res for last feature
 	printf("\n----------Saving Residuals----------\n");
 	// Save residuals
-	FILE *fp4 = fopen("../../res/res_f5.dta", "w");
+	FILE *fp4 = fopen("../../res/res_f3.dta", "w");
 	for (int j = 0; j < num_lines; j++) {
 		fprintf(fp4, "%f\n", res_data[j]);
 
