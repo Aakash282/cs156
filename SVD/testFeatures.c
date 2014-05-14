@@ -88,7 +88,7 @@ int main(){
 	char user_feature_file[40];
 	
 	// For each feature
-	for (int f = 1; f < 4; f++) {
+	for (int f = 1; f < 131; f++) {
 		FILE *fp5, *fp6;
 		// Save feature
 		printf("\n-----------Using feature %d-----------\n", f);
@@ -133,7 +133,7 @@ int main(){
 	}
 	printf("\n----------Saving Results----------\n");
 	// Save residuals
-	FILE *fp4 = fopen("results/f3.dta", "w");
+	FILE *fp4 = fopen("results/f130.dta", "w");
 	for (int j = 0; j < num_lines; j++) {
 		fprintf(fp4, "%f\n", prediction[j]);
 

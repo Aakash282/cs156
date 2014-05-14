@@ -1,6 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Add one because we're not using the first cell of both userValue and movieValue
+// to avoid off by one confusion
+static int num_users = 458293 + 1;
+static int num_movies = 17770 + 1;
+static int num_lines = 99666408;
+static inline
+float clipScore(float score) {
+	if (score < 1) {
+		return 1;
+	} else if (score > 5) {
+		return 5;
+	} else {
+		return score;
+	}
+}
 int main(){
 	// Iterate through all lines
 	FILE *fp =  fopen("../../netflix/mu/all.dta", "r");
@@ -15,10 +30,7 @@ int main(){
 	char str3[10];
 
 	// Load in features
-	// Add one because we're not using the first cell of both userValue and movieValue
-	// to avoid off by one confusion
-	int num_users = 458293 + 1;
-	int num_movies = 17770 + 1;
+
 	
 	float * userValue = calloc(num_users, sizeof(float));
 	float * movieValue = calloc(num_movies, sizeof(float));
@@ -35,7 +47,7 @@ int main(){
 
 
 	// Load movie data and baseline into array
-	int num_lines = 99666408;
+	
 	// int num_lines = 10;
 	int * movie_data = calloc(num_lines * 3, sizeof(int));
 	float * baseline_data = calloc(num_lines, sizeof(float));
@@ -82,7 +94,7 @@ int main(){
 	for (int i = 0; i < 120; i++) {
 		printf("\n Epoch %d\n", i);
 		for (int j = 0; j < num_lines; j++) {
-			baseline = baseline_data[j];
+			baseline = clipScore(baseline_data[j]);
 			line_number = j * 3;
 			user = movie_data[line_number];
 			movie = movie_data[line_number + 1];
@@ -91,6 +103,7 @@ int main(){
 			uv = userValue[user];
 			mv = movieValue[movie];
 			predict = baseline + uv * mv;
+			predict = clipScore(predict);
 			err = rating - predict;
 			userValue[user] += 0.001 * (err * mv - 0.02 * uv);
 			movieValue[movie] += 0.001 * (err * uv - 0.02 * mv);
@@ -103,7 +116,7 @@ int main(){
 	// Save residuals
 	FILE *fp4 = fopen("../../res/res_f1.dta", "w");
 	for (int j = 0; j < num_lines; j++) {
-		baseline = baseline_data[j];
+		baseline = clipScore(baseline_data[j]);
 		line_number = j * 3;
 		user = movie_data[line_number];
 		movie = movie_data[line_number + 1];
@@ -112,6 +125,7 @@ int main(){
 		uv = userValue[user];
 		mv = movieValue[movie];
 		predict = baseline + uv * mv;
+		predict = clipScore(predict);
 		err = rating - predict;
 		fprintf(fp4, "%f\n", err);
 		// printf("UserF %f MovieF %f\n", userValue[user], movieValue[movie]);

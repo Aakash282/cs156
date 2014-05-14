@@ -1,6 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+static int num_users = 458293 + 1;
+static int num_movies = 17770 + 1;
+static int num_lines = 99666408;
+static inline
+float clipScore(float score) {
+	if (score < 1) {
+		return 1;
+	} else if (score > 5) {
+		return 5;
+	} else {
+		return score;
+	}
+}
 int main(){
 	// Iterate through all lines
 	FILE *fp;
@@ -8,7 +20,7 @@ int main(){
 	FILE *fp3;
 	fp = fopen("../../netflix/mu/all.dta", "r");
 	fp2 = fopen( "../../netflix/mu/all.idx", "r");
-	fp3 = fopen("../../res/res_f3.dta", "r");
+	fp3 = fopen("../../res/res_f105.dta", "r");
 	if (fp == NULL || fp2 == NULL || fp3 == NULL) {
 		return -1;
 	}
@@ -16,8 +28,6 @@ int main(){
 	char str2[5];
 	char str3[15];
 
-	int num_lines = 99666408;
-	//int num_lines = 10000;
 	
 	printf("\n----------Loading res data-------------\n");
 	// Load res data
@@ -73,10 +83,6 @@ int main(){
 
 
 	printf("\n--------------Training Features --------------\n");
-	// Add one because we're not using the first cell of both userValue and movieValue
-	// to avoid off by one confusion
-	int num_users = 458293 + 1;
-	int num_movies = 17770 + 1;
 	float * userValue = calloc(num_users, sizeof(float));
 	float * movieValue = calloc(num_movies, sizeof(float));
 	if (userValue == NULL || movieValue == NULL) {
@@ -89,7 +95,7 @@ int main(){
 	char user_feature_file[50];
 	
 	// Train each feature
-	for (int f = 4; f < 101; f++) {
+	for (int f = 106; f < 131; f++) {
 		
 		printf("\n-------Feature %d -----------------\n", f);
 		// Initialize feature to 0.1
@@ -110,7 +116,7 @@ int main(){
 				// printf("User %d Movie %d Rating %d Baseling %f\n", user, movie, rating, baseline);
 				uv = userValue[user];
 				mv = movieValue[movie];
-				predict = rating - old_res + uv * mv;
+				predict = clipScore(rating - old_res + uv * mv);
 				err = rating - predict;
 				if (i == 120) {
 					res_data[j] = err;
@@ -141,8 +147,8 @@ int main(){
 
 	// Save res for last feature
 	printf("\n----------Saving Residuals----------\n");
-	// Save residuals
-	FILE *fp4 = fopen("../../res/res_f100.dta", "w");
+	//Save residuals
+	FILE *fp4 = fopen("../../res/res_f130.dta", "w");
 	for (int j = 0; j < num_lines; j++) {
 		fprintf(fp4, "%f\n", res_data[j]);
 
