@@ -1,0 +1,5 @@
+Results for baseline user and movie offset trained with
+varying number of iteratiosn
+baseline0 0.98703 -3.75
+baseline1 0.98358 -3.38
+baseline20 0.98122 -3.13

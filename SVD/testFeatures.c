@@ -1,9 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#define QUAL 0 // Flag for if using qual or probe set
 int main(){
 	// Iterate through all lines
-	FILE *fp = fopen("../../netflix/mu/qual.dta", "r");
+	FILE *fp;
+	int num_lines;
+	if (QUAL != 1) {
+		fp = fopen("../stats/probe.dta", "r");
+		num_lines = 1374739; // num lines in probe data
+	} else {
+		fp = fopen("../../netflix/mu/qual.dta", "r");
+		num_lines = 2749898; // num lines in qual data		
+	}
+
+
 	FILE *fp2 = fopen("../stats/better_mavg2.dta", "r");
 	FILE *fp3 = fopen("../stats/user_offset.dta", "r");
 
@@ -14,7 +24,8 @@ int main(){
 	printf("\n----------Loading qual data-------------\n");
 	// Load res data
 	char str[60];
-	int num_lines = 2749898; // num lines in qual data
+		
+	
 	int * qual_data = calloc(num_lines*2, sizeof(int));
 	if (qual_data == NULL) {
 		printf("Malloc failed\n");
@@ -133,7 +144,7 @@ int main(){
 	}
 	printf("\n----------Saving Results----------\n");
 	// Save residuals
-	FILE *fp4 = fopen("results/f130.dta", "w");
+	FILE *fp4 = fopen("results/probe_f130.dta", "w");
 	for (int j = 0; j < num_lines; j++) {
 		fprintf(fp4, "%f\n", prediction[j]);
 
