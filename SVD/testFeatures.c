@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define QUAL 0 // Flag for if using qual or probe set
+#define QUAL 1 // Flag for if using qual or probe set
 int main(){
 	// Iterate through all lines
 	FILE *fp;
@@ -9,7 +9,7 @@ int main(){
 		fp = fopen("../stats/probe.dta", "r");
 		num_lines = 1374739; // num lines in probe data
 	} else {
-		fp = fopen("../../netflix/mu/qual.dta", "r");
+		fp = fopen("../../netflix/um/qual.dta", "r");
 		num_lines = 2749898; // num lines in qual data		
 	}
 
@@ -144,7 +144,7 @@ int main(){
 	}
 	printf("\n----------Saving Results----------\n");
 	// Save residuals
-	FILE *fp4 = fopen("results/probe_f130.dta", "w");
+	FILE *fp4 = fopen("results/um_f130.dta", "w");
 	for (int j = 0; j < num_lines; j++) {
 		fprintf(fp4, "%f\n", prediction[j]);
 
