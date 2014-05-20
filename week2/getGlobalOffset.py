@@ -1,0 +1,1 @@
+# Get global offset from average for each user
