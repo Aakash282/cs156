@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <math.h>
 
 /* Constants for operation*/
 // Add one because we're not using the first cell of both userValue and movieValue
@@ -28,7 +28,7 @@ float clipScore(float score) {
 // storing user, movie, rating
 static inline
 int * loadMovieData() {
-	printf("\n----------Loading data-------------\n");
+	printf("----------Loading data-------------\n");
 	int line_number = 0;
 	int count = 0;
 	// Iterate through all lines
@@ -60,9 +60,9 @@ int * loadMovieData() {
 		
 		line_number += 3;
 		count++;
-		if (count % 10000000 == 0) {
-			printf("%d\n", count);
-		}
+		// if (count % 10000000 == 0) {
+		// 	printf("%d\n", count);
+		// }
 	}
 	fclose(fp);	
 	fclose(fp2);
@@ -78,13 +78,13 @@ void loadData(char * file, float * data) {
 	if (fp == NULL) {
 		return;
 	}
-	printf("\n----------Loading data from file %s-------------\n", file);
+	printf("----------Loading data from file %s-------------\n", file);
 	while (fgets(str, 60, fp) != NULL) {
 		data[count] = atof(str);		
 		//printf("%f\n", data[count]);
-		if (count % 10000 == 0) {
-			printf("%d\n", count);
-		}
+		// if (count % 10000 == 0) {
+		// 	printf("%d\n", count);
+		// }
 		count++;
 	}	
 }
@@ -95,16 +95,17 @@ int main(){
 		printf("Malloc failed\n");
 		return -1;
 	}
-	loadData("../stats/user_offset.dta", userOffset);
-	loadData("../stats/movie_offset.dta", movieOffset);
+	loadData("../stats/user_offset_reg2.dta", userOffset);
+	loadData("../stats/movie_offset_reg.dta", movieOffset);
 	int * movie_data = loadMovieData();
 	// printf("test %f %f %f %f\n", userOffset[5], userOffset[num_users - 1], movieOffset[5], movieOffset[num_movies - 1]);
 	
-	printf("\n--------------Training Offsets --------------\n");
+	printf("--------------Training Offsets --------------\n");
 	int user, movie, line_number;
-	float rating, baseline, predict, res, err, uv, mv;
+	float rating, baseline, predict, res, err, uv, mv, total_err;
 	for (int i = 0; i < epochs; i++) {
-		printf("\n Epoch %d\n", i);
+		//printf("\n Epoch %d\n", i);
+		total_err = 0;
 		for (int j = 0; j < num_lines; j++) {
 			line_number = j * 3;
 			user = movie_data[line_number];
@@ -125,7 +126,7 @@ int main(){
 		}
 	}
 
-	printf("\n-----------Saving offsets-----------\n");
+	printf("-----------Saving offsets-----------\n");
 	// // Save features
 	FILE *fp = fopen("features/movie_offset.dta", "w");
 	for (int f = 1; f < num_movies; f++) {

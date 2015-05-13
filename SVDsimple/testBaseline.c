@@ -3,11 +3,14 @@
 #include <stdlib.h>
 
 static float GLOBAL_AVG = 3.609516;
+//static int num_lines = 2749898; // num lines in qual data
+static int num_lines = 1374739; // num lines in probe;
 int main(){
 	// Iterate through all lines
-	FILE *fp = fopen("../../netflix/mu/qual.dta", "r");
-	FILE *fp2 = fopen("features/movie_offset.dta", "r");
-	FILE *fp3 = fopen("features/user_offset.dta", "r");
+	//FILE *fp = fopen("../../netflix/um/qual.dta", "r");
+	FILE *fp = fopen("../stats/probe.dta", "r");
+	FILE *fp2 = fopen("../stats/movie_offset_reg.dta", "r");
+	FILE *fp3 = fopen("../stats/user_offset_reg2.dta", "r");
 
 	if (fp == NULL || fp2 == NULL || fp3 == NULL) {
 		return -1;
@@ -16,7 +19,7 @@ int main(){
 	printf("\n----------Loading qual data-------------\n");
 	// Load res data
 	char str[60];
-	int num_lines = 2749898; // num lines in qual data
+	
 	// Multiply by two because we're storing user and movie per line
 	int * qual_data = calloc(num_lines*2, sizeof(int));
 	if (qual_data == NULL) {
@@ -94,7 +97,7 @@ int main(){
 	}
 	printf("\n----------Saving Results----------\n");
 	// Save residuals
-	FILE *fp4 = fopen("results/baseline20.dta", "w");
+	FILE *fp4 = fopen("results/um_probe_baseline0reg.dta", "w");
 	for (int j = 0; j < num_lines; j++) {
 		fprintf(fp4, "%f\n", prediction[j]);
 

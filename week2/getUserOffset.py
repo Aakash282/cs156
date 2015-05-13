@@ -3,7 +3,7 @@
 from numpy import *
 import linecache
 # setup
-avg = open('../stats/user_offset.dta', 'w')
+avg = open('../stats/user_offset_reg2.dta', 'w')
 idx = open('../../netflix/um/all.idx', 'r')
 current = 0 # always starts with movie 1
 total, n = 0.0, 0
@@ -21,26 +21,25 @@ with open('../../netflix/um/all.dta', 'r') as f:
         l = s.strip().split()
 
         current = int(l[0])
-        movie = int(l[1])
-        u_rating = int(l[3])
+        movie = int(l[1]);
         # save results in file
         if (temp != current):
-            result = '{0}\n'.format(round(total / n - GLOBAL_AVG, 6))
+            result = '{0}\n'.format(round(total / (10 + n), 6))
             avg.write(result)
             total = 0.0
             n = 0
             temp = current
-            if (current % 1000 == 0):
+            if (current % 10000 == 0):
                 print current
 
 
         # collect total
-        total += int(l[3])
+        total += int(l[3]) - GLOBAL_AVG - float(linecache.getline('../stats/movie_offset_reg.dta', movie).strip().split()[0])
         n += 1
 
 
     # save results for last movie
-    result = '{0}\n'.format(total / n - GLOBAL_AVG, 6)
+    result = '{0}\n'.format(round(total / (10 + n), 6))
     avg.write(result)
 
 idx.close()

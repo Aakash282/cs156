@@ -3,7 +3,7 @@
 from numpy import *
 
 # setup
-avg = open('../stats/movie_offset.dta', 'w')
+avg = open('../stats/movie_offset_reg.dta', 'w')
 idx = open('../../netflix/mu/all.idx', 'r')
 current = 0 # always starts with movie 1
 total, n = 0.0, 0
@@ -24,7 +24,7 @@ with open('../../netflix/mu/all.dta', 'r') as f:
 
         # save results in file
         if (temp != current):
-            result = '{0}\n'.format(round(total / n - GLOBAL_AVG, 6))
+            result = '{0}\n'.format(round(total / (25 + n), 6))
             avg.write(result)
             total = 0.0
             n = 0
@@ -34,12 +34,12 @@ with open('../../netflix/mu/all.dta', 'r') as f:
 
 
         # collect total
-        total += int(l[3])
+        total += int(l[3]) - GLOBAL_AVG
         n += 1
 
 
     # save results for last movie
-    result = '{0}\n'.format(round(total / n - GLOBAL_AVG, 6))
+    result = '{0}\n'.format(round(total / (25 + n), 6))
     avg.write(result)
 
 idx.close()

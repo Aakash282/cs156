@@ -6,12 +6,16 @@
 // to avoid off by one confusion
 static int num_users = 458293 + 1;
 static int num_movies = 17770 + 1;
-static int num_lines = 2749898; // num lines in qual data
+//static int num_lines = 2749898; // num lines in qual data
+static int num_lines = 1374739; // num lines in probe;
 static float GLOBAL_AVG = 3.609516;
-static int num_features = 50;
+static int num_features = 220;
 
 // Movie data array
 int * movie_data;
+
+// Indices for what set each data point belongs to
+int * index;
 // Baseline offset arrays
 float * userOffset;
 float * movieOffset;
@@ -41,7 +45,7 @@ float clipScore(float score) {
 // Loads movie data into a 1 d array
 // storing user, movie, rating
 void loadMovieData(char * file) {
-	printf("\n----------Loading movie data-------------\n");
+	printf("----------Loading movie data-------------\n");
 	int line_number = 0;
 	int count = 0;
 	// Iterate through all lines
@@ -52,7 +56,8 @@ void loadMovieData(char * file) {
 	}
 
 	movie_data = calloc(num_lines * 2, sizeof(int));
-	if (movie_data == NULL) {
+	index = calloc(num_lines, sizeof(int));
+	if (movie_data == NULL || index == NULL) {
 		printf("Malloc failed\n");
 		return;
 	}
@@ -80,7 +85,7 @@ void loadData(char * file, float * data) {
 	if (fp == NULL) {
 		return;
 	}
-	printf("\n----------Loading data from file %s--------\n", file);
+	printf("----------Loading data from file %s--------\n", file);
 	while (fgets(str, 60, fp) != NULL) {
 		data[count] = atof(str);		
 		//printf("%f\n", data[count]);
@@ -106,11 +111,11 @@ void loadFeatures(char * file, int num_items, float ** data) {
 		printf("Couldn't open file %s\n", file);
 		return;
 	}
-	char str[1000];
+	char str[5000];
 	int item_n = 1;
-	printf("\n----------Loading data from file %s--------\n", file);
+	printf("----------Loading data from file %s--------\n", file);
 	// For each user or movie on each line
-	while (fgets(str, 1000, fp) != NULL) {
+	while (fgets(str, 5000, fp) != NULL) {
 		// Get first feature
 		data[item_n][0] = atof(strtok(str, " "));
 		// Get other features
@@ -118,6 +123,7 @@ void loadFeatures(char * file, int num_items, float ** data) {
 			data[item_n][i] = atof(strtok(NULL, " "));
 		item_n ++;
 	}
+	printf("test %f\n", data[num_items-1][num_features-1]);
 }
 
 static inline
@@ -145,7 +151,8 @@ void saveResults(char * file) {
 
 int main(){
 	// Load Movie data
-	loadMovieData("../../netflix/um/qual.dta");
+	//loadMovieData("../../netflix/um/qual.dta");
+	loadMovieData("../stats/probe.dta");
 	printf("test %d\n", movie_data[20]);
 	// printf("test %f %f %f %f\n", userOffset[5], userOffset[num_users - 1], movieOffset[5], movieOffset[num_movies - 1]);
 	
@@ -168,13 +175,13 @@ int main(){
 
 
 	// Load offsets
-	loadData("features/f050_e030/user_offset.dta", userOffset);
-	loadData("features/f050_e030/movie_offset.dta", movieOffset);
+	loadData("features/f220_e060_t/user_offset.dta", userOffset);
+	loadData("features/f220_e060_t/movie_offset.dta", movieOffset);
 
 
 	// Load featuress
-	loadFeatures("features/f050_e030/user_features.dta", num_users, userFeatures);
-	loadFeatures("features/f050_e030/movie_features.dta", num_movies, movieFeatures);
+	loadFeatures("features/f220_e060_t/user_features.dta", num_users, userFeatures);
+	loadFeatures("features/f220_e060_t/movie_features.dta", num_movies, movieFeatures);
 	printf("Test %f %f\n", userFeatures[1][num_features - 1], userFeatures[num_users-1][num_features-1]);
 
 	predictions = calloc(num_lines, sizeof(float));
@@ -195,7 +202,7 @@ int main(){
 	
 
 	printf("\n-----------Saving results-----------\n");
-	saveResults("results/um_test_f050_e030.dta");
+	saveResults("results/um_probe_f220_e060_t.dta");
 
 	free(userOffset);
 	free(movieOffset);

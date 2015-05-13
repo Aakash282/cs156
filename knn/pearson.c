@@ -24,8 +24,8 @@
 
 int main(){
 	// Iterate through all lines
-	FILE *fp =  fopen("../../netflix/um/all.dta", "r");
-	FILE *fp2 = fopen("../../netflix/um/all.idx", "r");
+	FILE *fp =  fopen("um/all.dta", "r");
+	FILE *fp2 = fopen("um/all.idx", "r");
 	if (fp == NULL || fp2 == NULL) {
 		return -1;
 	}
@@ -52,10 +52,9 @@ int main(){
 
 	printf("\n----------Loading data-------------\n");
 
-	FILE *fp3 = fopen("../stats/uavg.dta", "r");
-	num_lines = 458293;
+	FILE *fp3 = fopen("um/uavg.dta", "r");
 	int user_idx = 0;
-	// make array for uavg data [avg n]
+	// make array for uavg data
 	float * uavg = calloc(num_lines * 2, sizeof(float));
 
 	if (uavg == NULL) {
@@ -75,6 +74,10 @@ int main(){
 	// where avg is the average for the user
 	// where n is the number of ratings b the user
 
+	int currentUser = 1;
+	int user; 
+
+	int userCount = 0;
 	// iterate though the files until completion
 	while (fgets(str, 60, fp) != NULL && fgets(str2, 5, fp2) != NULL) {
 		// Only use index < 5
@@ -82,8 +85,19 @@ int main(){
 			continue;
 		}
 
+		user = atoi(strtok(str, " "));
+
+		if (uavg[(2 * (user - 1)) + 1] <= 2000) {
+			continue;
+		}
+		if(user != currentUser) {
+			userCount += 1;
+			currentUser = user;
+		}
+		
+
 		// Get user, movie, rating
-		movie_data[line_number] = atoi(strtok(str, " "));
+		movie_data[line_number] = user;
 		movie_data[line_number + 1] = atoi(strtok(NULL, " "));
 		strtok(NULL, " ");	// ignore time
 		movie_data[line_number + 2] = atoi(strtok(NULL, " "));
@@ -99,15 +113,15 @@ int main(){
 	int count = 0;
 
 
-	
-	
+	printf("%d %d\n", userCount, sample);
+
 
 	printf("\n-----------Computing Similarities--------------\n");
-	int users = 458293;
+	int users = 458292;
 	
 	// Iterator
-	int a = 0;			// this is the user we are currently comparing all users to
-	int u = 1;			// this is the user a is currently being compared to
+	int a = movie_data[0] - 1;			// this is the user we are currently comparing all users to
+	int u;			// this is the user a is currently being compared to
 	int i = 0;			// i iterates through movie_data for user a
 	int j = 0;			// j iterates through movie_data for user u
 	int c, q, k;		// inner loop iterators
@@ -117,30 +131,31 @@ int main(){
 	float den;			// the completed denominator
 	float result;		// the pearson coefficient to be stored. 
 	int counter = 0;	// inner loop iterator
+	int last = 10000; 			// iterator for updates
 
 	int new_user = 0;	// boolean for whether user has been considered 
 
-	FILE *fp4 = fopen("../../netflix/um/pearson.dta", "w");
-	// this is an outer loop | we need Pearson's between all users
-	// on the order of n^2 handshakes. Here we iterate a.
+	FILE *fp4 = fopen("um/pearson.dta", "w");
+
 	while (movie_data[3 * i] != a + 1) {
 		i++;
 	}
 
-
-	while (a < users) {
+	// this is an outer loop | we need Pearson's between all users
+	// on the order of n^2 handshakes. Here we iterate a.
+	while (i + 3 < line_number) {
 		// create an array of size n
 		int * movies = calloc(uavg[2 * a + 1] * 2, sizeof(int));
 
-		printf("User = %d\n", movie_data[3 * i]);
+		// printf("User = %d\n", movie_data[3 * i]);
 		// collect all data on the current user
-		while (!new_user) {
+		while (1) {
 			// are we considering a new user
-			new_user = (movie_data[3 * i] != a + 1) ? 1 : 0;
-			if (new_user) 
+			new_user = (!new_user && i >= 1 && (a + 1) != movie_data[3 * i - 3]) ? 1 : 0;
+			if (new_user)
 				break;
 
-			printf("Movie: %d Rating: %d\n", movie_data[3 * i + 1], movie_data[3 * i + 2]);
+			// printf("Movie: %d Rating: %d\n", movie_data[3 * i + 1], movie_data[3 * i + 2]);
 
 			// what movies has this user watched?
 			// store the movie and rating
@@ -151,34 +166,39 @@ int main(){
 		}
 
 		// prints out progress updates
-		if ((a + 1) % 10 == 0) {
-			printf("%d\n", a + 1);
+		if ((a + 1) - last >= 0) {
+			printf("%d\n", last);
+			last += last;
 		}
 
 		j = i;
+
+		u = movie_data[3 * j] - 1;
 		
+		// printf("%d %d %d %d %f %f\n", i, j, a, u, uavg[(2 * a) + 1], uavg[(2 * u) + 1]);
+
 		// this is an inner loop | compare user a with all other users.
 		// Here we iterate u.
-		while (u < users) {
+		while (j + 3 < line_number) {
 			// make an array the size of movies (which is also the max 
 			// size of common)
 			float * common = calloc(uavg[(2 * a) + 1] * 2, sizeof(float));
 
 			// print for updates
-			printf("Movies %d and %d\n", a + 1, u + 1);
+			// printf("User %d and %d\n", a + 1, u + 1);
 
 			new_user = 0;
 			c = 0;
 
 			// collect data on another user
-			while (!new_user) {
+			while (1) {
 				// consider a new data point
 				// are we considering a new user
-				new_user = (movie_data[3 * j] - (u + 1) != 0) ? 1 : 0;
+				new_user = (!new_user && j > i && (u + 1) != (movie_data[3 * j - 3])) ? 1 : 0;
 				
 				// compute the pearson similarity using array of common movie ratings
 				if (new_user) {
-					if (c >= 48){
+					if (c >= 0){
 						// clear the values from the last computation
 						num = 0;
 						den1 = 0;
@@ -200,18 +220,27 @@ int main(){
 						// calculate the result and store it in the file
 						// deal with divide by zero
 						if (den == 0.0) {
-							fprintf(fp4, "%d %d %f %d\n", a, u, 0.0, (c / 2));
+							fprintf(fp4, "%d %d %f %d\n", (a + 1), (u + 1), 0.0, (c / 2));
 						}
 						else {
-							fprintf(fp4, "%d %d %f %d\n", a, u, result, (c / 2));
+							fprintf(fp4, "%d %d %f %d\n", (a + 1), (u + 1), result, (c / 2));
+							// printf("RESULT: %d %d %f %d\n", (a + 1), (u + 1), result, (c / 2));
 						}
+
 						break;
 					}
 				}
 
 				// Add any common movies to the common array
 				for (q = 0; q < (uavg[(2 * a) + 1] * 2); q += 2) {
-					if (movie_data[3 * j + 1] - movies[q] == 0 && c <= uavg[(2 * a) + 1] * 2) {
+					// printf("%d %d\n", movie_data[3 * j + 1], movies[q]);
+
+					// if the movie we are looking at is smaller than the movie number in the 
+					// movies list, just break because we won't ever find it. 
+					if (movie_data[3 * j + 1] < movies[q]) {
+						break;
+					}
+					if (movie_data[3 * j + 1] == movies[q] && c <= uavg[(2 * a) + 1] * 2) {
 						common[c] = movies[q + 1];
 						common[c + 1] = movie_data[3 * j + 2];
 						// printf("ratings: %d, %d\n", movies[q+1], movie_data[3 * j + 2]);
@@ -220,21 +249,23 @@ int main(){
 					}
 				}
 
+				// printf("%d\n", movie_data[(3 * (j + 1)) + 1]);
 				// iterate to the next data point
 				j += 1;
+				// break;
 			}
 
 			free(common);
 
 			// iterate to the next movie to compare with
-			u += 1;
+			u = movie_data[3 * j] - 1;
+			// printf("After %d %d %d %d %f %f\n", i, j, a, u, uavg[(2 * a) + 1], uavg[(2 * u) + 1]);
 		}
 
 		free(movies);
 
 		// update iterator 
-		a += 1;
-		u = a + 1;
+		a = movie_data[3 * i] - 1;
 		counter = 0;
 		new_user = 0;
 	}

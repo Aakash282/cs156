@@ -8,7 +8,7 @@
 static int num_users = 458293 + 1;
 static int num_movies = 17770 + 1;
 static int num_lines = 99666408;
-static int epochs = 30; // number of iterations to do over whole data set
+static int epochs = 15; // number of iterations to do over whole data set
 static float GLOBAL_AVG = 3.609516;
 static int num_features = 50;
 
@@ -62,11 +62,12 @@ void loadMovieData() {
 	printf("\n----------Loading movie data-------------\n");
 	int line_number = 0;
 	int count = 0;
+	int index;
 	// Iterate through all lines
 	char str[60];
 	char str2[5];
-	FILE *fp =  fopen("../../netflix/um/all.dta", "r");
-	FILE *fp2 = fopen("../../netflix/um/all.idx", "r");
+	FILE *fp =  fopen("../../netflix/mu/all.dta", "r");
+	FILE *fp2 = fopen("../../netflix/mu/all.idx", "r");
 	if (fp == NULL || fp2 == NULL) {
 		return;
 	}
@@ -79,6 +80,7 @@ void loadMovieData() {
 
 	while (fgets(str, 60, fp) != NULL && fgets(str2, 5, fp2) != NULL) {
 		// Only use index < 5
+		//index = atoi(strtok(str2, " "))
 		if (atoi(strtok(str2, " ")) == 5) {
 			continue;
 		}
@@ -209,12 +211,12 @@ void updateBaseline(int user, int movie, float err) {
 
 void saveOffsets() {
 	// Save baseline offsets
-	FILE *fp = fopen("features/f050_e030/movie_offset.dta", "w");
+	FILE *fp = fopen("features/f050_e015/movie_offset.dta", "w");
 	for (int f = 1; f < num_movies; f++) {
 		fprintf(fp, "%f\n", movieOffset[f]);
 	}
 	fclose(fp);
-	fp = fopen("features/f050_e030/user_offset.dta", "w");
+	fp = fopen("features/f050_e015/user_offset.dta", "w");
 	for (int f = 1; f < num_users; f++) {
 		fprintf(fp, "%f\n", userOffset[f]);
 	}
@@ -271,7 +273,6 @@ int main(){
 	srand (time(NULL));
 	initializeUserFeatures();
 	initializeMovieFeatures();
-	//initializeImplicitFeatures();
 
 	printf("\n--------------Training --------------\n");
 	int user, movie, line_number;
@@ -300,8 +301,8 @@ int main(){
 
 	printf("\n-----------Saving features-----------\n");
 	saveOffsets();
-	saveUserFeatures("features/f050_e030/user_features.dta");
-	saveMovieFeatures("features/f050_e030/movie_features.dta");
+	saveUserFeatures("features/f050_e015/user_features.dta");
+	saveMovieFeatures("features/f050_e015/movie_features.dta");
 
 	free(userOffset);
 	free(movieOffset);
